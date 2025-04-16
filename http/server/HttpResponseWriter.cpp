@@ -54,7 +54,7 @@ int HttpResponseWriter::WriteBody(const char* buf, int len /* = -1 */) {
 
 int HttpResponseWriter::WriteResponse(HttpResponse* resp) {
     if (resp == NULL) {
-        response->status_code = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+        response->status_code = HTTP_STATUS_HV_INTERNAL_SERVER_ERROR;
         return 0;
     }
     bool is_dump_headers = state == SEND_BEGIN ? true : false;

@@ -73,7 +73,7 @@ class HttpContext {
     int sendJson(const T& t);
 
     // 重定向
-    int redirect(const std::string& location, http_status status = HTTP_STATUS_FOUND);
+    int redirect(const std::string& location, http_status status = HTTP_STATUS_HV_FOUND);
 
     // 主动关闭连接
     int close();

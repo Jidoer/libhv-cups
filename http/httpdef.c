@@ -12,7 +12,7 @@ static int strstartswith(const char* str, const char* start) {
 
 const char* http_status_str(enum http_status status) {
     switch (status) {
-#define XX(num, name, string) case HTTP_STATUS_##name: return #string;
+#define XX(num, name, string) case HTTP_STATUS_HV_##name: return #string;
     HTTP_STATUS_MAP(XX)
 #undef XX
     default: return "<unknown>";
@@ -40,7 +40,7 @@ const char* http_content_type_str(enum http_content_type type) {
 enum http_status http_status_enum(const char* str) {
 #define XX(num, name, string) \
     if (strcmp(str, #string) == 0) { \
-        return HTTP_STATUS_##name; \
+        return HTTP_STATUS_HV_##name; \
     }
     HTTP_STATUS_MAP(XX)
 #undef XX

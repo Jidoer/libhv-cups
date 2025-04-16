@@ -25,7 +25,7 @@ static int wget(const char* url, const char* filepath, wget_progress_cb progress
         return ret;
     }
     printd("%s", resp.Dump(true, false).c_str());
-    if (resp.status_code == HTTP_STATUS_NOT_FOUND) {
+    if (resp.status_code == HTTP_STATUS_HV_NOT_FOUND) {
         fprintf(stderr, "404 Not Found\n");
         return 404;
     }

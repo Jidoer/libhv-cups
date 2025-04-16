@@ -90,7 +90,7 @@ typedef struct connection_s {
             int delay = hloop_now_ms(hevent_loop(io)) - start_time;
             delays.push_back(delay);
             ++response_cnt;
-            if (response->status_code == HTTP_STATUS_OK) {
+            if (response->status_code == HTTP_STATUS_HV_OK) {
                 ++ok_cnt;
             }
             return true;

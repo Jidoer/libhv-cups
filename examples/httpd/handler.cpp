@@ -56,11 +56,11 @@ int Handler::Authorization(HttpRequest* req, HttpResponse* resp) {
     std::string token = req->GetHeader("Authorization");
     if (token.empty()) {
         response_status(resp, 10011, "Miss Authorization header!");
-        return HTTP_STATUS_UNAUTHORIZED;
+        return HTTP_STATUS_HV_UNAUTHORIZED;
     }
     else if (strcmp(token.c_str(), "abcdefg") != 0) {
         response_status(resp, 10012, "Authorization failed!");
-        return HTTP_STATUS_UNAUTHORIZED;
+        return HTTP_STATUS_HV_UNAUTHORIZED;
     }
     return HTTP_STATUS_NEXT;
 }
@@ -113,7 +113,7 @@ int Handler::query(const HttpContextPtr& ctx) {
 
 int Handler::kv(HttpRequest* req, HttpResponse* resp) {
     if (req->content_type != APPLICATION_URLENCODED) {
-        return response_status(resp, HTTP_STATUS_BAD_REQUEST);
+        return response_status(resp, HTTP_STATUS_HV_BAD_REQUEST);
     }
     resp->content_type = APPLICATION_URLENCODED;
     resp->kv = req->GetUrlEncoded();
@@ -125,7 +125,7 @@ int Handler::kv(HttpRequest* req, HttpResponse* resp) {
 
 int Handler::json(HttpRequest* req, HttpResponse* resp) {
     if (req->content_type != APPLICATION_JSON) {
-        return response_status(resp, HTTP_STATUS_BAD_REQUEST);
+        return response_status(resp, HTTP_STATUS_HV_BAD_REQUEST);
     }
     resp->content_type = APPLICATION_JSON;
     resp->json = req->GetJson();
@@ -137,7 +137,7 @@ int Handler::json(HttpRequest* req, HttpResponse* resp) {
 
 int Handler::form(HttpRequest* req, HttpResponse* resp) {
     if (req->content_type != MULTIPART_FORM_DATA) {
-        return response_status(resp, HTTP_STATUS_BAD_REQUEST);
+        return response_status(resp, HTTP_STATUS_HV_BAD_REQUEST);
     }
     resp->content_type = MULTIPART_FORM_DATA;
     resp->form = req->GetForm();
@@ -150,7 +150,7 @@ int Handler::form(HttpRequest* req, HttpResponse* resp) {
 
 int Handler::grpc(HttpRequest* req, HttpResponse* resp) {
     if (req->content_type != APPLICATION_GRPC) {
-        return response_status(resp, HTTP_STATUS_BAD_REQUEST);
+        return response_status(resp, HTTP_STATUS_HV_BAD_REQUEST);
     }
     // parse protobuf
     // ParseFromString(req->body);
@@ -187,20 +187,20 @@ int Handler::login(const HttpContextPtr& ctx) {
     std::string password = ctx->get("password");
     if (username.empty() || password.empty()) {
         response_status(ctx, 10001, "Miss username or password");
-        return HTTP_STATUS_BAD_REQUEST;
+        return HTTP_STATUS_HV_BAD_REQUEST;
     }
     else if (strcmp(username.c_str(), "admin") != 0) {
         response_status(ctx, 10002, "Username not exist");
-        return HTTP_STATUS_BAD_REQUEST;
+        return HTTP_STATUS_HV_BAD_REQUEST;
     }
     else if (strcmp(password.c_str(), "123456") != 0) {
         response_status(ctx, 10003, "Password wrong");
-        return HTTP_STATUS_BAD_REQUEST;
+        return HTTP_STATUS_HV_BAD_REQUEST;
     }
     else {
         ctx->set("token", "abcdefg");
         response_status(ctx, 0, "OK");
-        return HTTP_STATUS_OK;
+        return HTTP_STATUS_HV_OK;
     }
 }
 
@@ -227,7 +227,7 @@ int Handler::recvLargeFile(const HttpContextPtr& ctx, http_parser_state state, c
             if (ctx->is(MULTIPART_FORM_DATA)) {
                 // NOTE: You can use multipart_parser if you want to use multipart/form-data.
                 ctx->close();
-                return HTTP_STATUS_BAD_REQUEST;
+                return HTTP_STATUS_HV_BAD_REQUEST;
             }
             std::string save_path = "html/uploads/";
             std::string filename = ctx->param("filename", "unnamed.txt");
@@ -235,7 +235,7 @@ int Handler::recvLargeFile(const HttpContextPtr& ctx, http_parser_state state, c
             file = new HFile;
             if (file->open(filepath.c_str(), "wb") != 0) {
                 ctx->close();
-                return HTTP_STATUS_INTERNAL_SERVER_ERROR;
+                return HTTP_STATUS_HV_INTERNAL_SERVER_ERROR;
             }
             ctx->userdata = file;
         }
@@ -245,14 +245,14 @@ int Handler::recvLargeFile(const HttpContextPtr& ctx, http_parser_state state, c
             if (file && data && size) {
                 if (file->write(data, size) != size) {
                     ctx->close();
-                    return HTTP_STATUS_INTERNAL_SERVER_ERROR;
+                    return HTTP_STATUS_HV_INTERNAL_SERVER_ERROR;
                 }
             }
         }
         break;
     case HP_MESSAGE_COMPLETE:
         {
-            status_code = HTTP_STATUS_OK;
+            status_code = HTTP_STATUS_HV_OK;
             ctx->setContentType(APPLICATION_JSON);
             response_status(ctx, status_code);
             if (file) {
@@ -282,7 +282,7 @@ int Handler::sendLargeFile(const HttpContextPtr& ctx) {
         std::string filepath = ctx->service->document_root + ctx->request->Path();
         HFile file;
         if (file.open(filepath.c_str(), "rb") != 0) {
-            ctx->writer->WriteStatus(HTTP_STATUS_NOT_FOUND);
+            ctx->writer->WriteStatus(HTTP_STATUS_HV_NOT_FOUND);
             ctx->writer->WriteHeader("Content-Type", "text/html");
             ctx->writer->WriteBody("<center><h1>404 Not Found</h1></center>");
             ctx->writer->End();

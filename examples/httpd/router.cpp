@@ -89,7 +89,7 @@ void Router::Register(hv::HttpService& router) {
         requests::async(req2, [writer](const HttpResponsePtr& resp2){
             writer->Begin();
             if (resp2 == NULL) {
-                writer->WriteStatus(HTTP_STATUS_NOT_FOUND);
+                writer->WriteStatus(HTTP_STATUS_HV_NOT_FOUND);
                 writer->WriteHeader("Content-Type", "text/html");
                 writer->WriteBody("<center><h1>404 Not Found</h1></center>");
             } else {

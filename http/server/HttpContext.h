@@ -196,7 +196,7 @@ struct HV_EXPORT HttpContext {
     }
 #endif
 
-    int redirect(const std::string& location, http_status status = HTTP_STATUS_FOUND) {
+    int redirect(const std::string& location, http_status status = HTTP_STATUS_HV_FOUND) {
         response->Redirect(location, status);
         return send();
     }

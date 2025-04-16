@@ -88,20 +88,23 @@ enum http_parser_state {
   XX(511, NETWORK_AUTHENTICATION_REQUIRED, Network Authentication Required) \
 
 // HTTP_STATUS_##name
+// #ifndef HTTP_STATUS_HV_OK
+// #warning "HTTP_STATUS_HV_OK is not defined -->def ALL HTTP status"
 enum http_status {
-#define XX(num, name, string) HTTP_STATUS_##name = num,
+#define XX(num, name, string) HTTP_STATUS_HV_##name = num,
     HTTP_STATUS_MAP(XX)
 #undef XX
     HTTP_CUSTOM_STATUS
 };
+// #endif
 
 #define HTTP_STATUS_IS_REDIRECT(status)             \
     (                                               \
-    (status) == HTTP_STATUS_MOVED_PERMANENTLY   ||  \
-    (status) == HTTP_STATUS_FOUND               ||  \
-    (status) == HTTP_STATUS_SEE_OTHER           ||  \
-    (status) == HTTP_STATUS_TEMPORARY_REDIRECT  ||  \
-    (status) == HTTP_STATUS_PERMANENT_REDIRECT      \
+    (status) == HTTP_STATUS_HV_MOVED_PERMANENTLY   ||  \
+    (status) == HTTP_STATUS_HV_FOUND               ||  \
+    (status) == HTTP_STATUS_HV_SEE_OTHER           ||  \
+    (status) == HTTP_STATUS_HV_TEMPORARY_REDIRECT  ||  \
+    (status) == HTTP_STATUS_HV_PERMANENT_REDIRECT      \
 	)
 
 // http_mehtod

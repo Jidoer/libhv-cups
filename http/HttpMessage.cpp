@@ -405,8 +405,8 @@ bool HttpMessage::NeedContentLength() {
     if (type == HTTP_RESPONSE) {
         HttpResponse* res = (HttpResponse*)(this);
         if (res->status_code / 100 == 1 ||
-            res->status_code == HTTP_STATUS_NO_CONTENT ||
-            res->status_code == HTTP_STATUS_NOT_MODIFIED) {
+            res->status_code == HTTP_STATUS_HV_NO_CONTENT ||
+            res->status_code == HTTP_STATUS_HV_NOT_MODIFIED) {
             return false;
         }
         return true;
@@ -831,7 +831,7 @@ HttpResponse::HttpResponse() : HttpMessage() {
 }
 
 void HttpResponse::Init() {
-    status_code = HTTP_STATUS_OK;
+    status_code = HTTP_STATUS_HV_OK;
 }
 
 void HttpResponse::Reset() {

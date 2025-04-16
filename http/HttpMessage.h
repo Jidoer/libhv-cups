@@ -197,19 +197,19 @@ public:
     }
     int SaveFormFile(const char* name, const char* path) {
         if (ContentType() != MULTIPART_FORM_DATA) {
-            return HTTP_STATUS_BAD_REQUEST;
+            return HTTP_STATUS_HV_BAD_REQUEST;
         }
         if (form.empty()) {
             ParseBody();
-            if (form.empty()) return HTTP_STATUS_BAD_REQUEST;
+            if (form.empty()) return HTTP_STATUS_HV_BAD_REQUEST;
         }
         auto iter = form.find(name);
         if (iter == form.end()) {
-            return HTTP_STATUS_BAD_REQUEST;
+            return HTTP_STATUS_HV_BAD_REQUEST;
         }
         const auto& formdata = iter->second;
         if (formdata.content.empty()) {
-            return HTTP_STATUS_BAD_REQUEST;
+            return HTTP_STATUS_HV_BAD_REQUEST;
         }
         std::string filepath(path);
         if (HPath::isdir(path)) {
@@ -217,7 +217,7 @@ public:
         }
         HFile file;
         if (file.open(filepath.c_str(), "wb") != 0) {
-            return HTTP_STATUS_INTERNAL_SERVER_ERROR;
+            return HTTP_STATUS_HV_INTERNAL_SERVER_ERROR;
         }
         file.write(formdata.content.data(), formdata.content.size());
         return 200;
@@ -342,7 +342,7 @@ public:
     int File(const char* filepath) {
         HFile file;
         if (file.open(filepath, "rb") != 0) {
-            return HTTP_STATUS_NOT_FOUND;
+            return HTTP_STATUS_HV_NOT_FOUND;
         }
         SetContentTypeByFilename(filepath);
         file.readall(body);
@@ -352,7 +352,7 @@ public:
     int SaveFile(const char* filepath) {
         HFile file;
         if (file.open(filepath, "wb") != 0) {
-            return HTTP_STATUS_NOT_FOUND;
+            return HTTP_STATUS_HV_NOT_FOUND;
         }
         file.write(body.data(), body.size());
         return 200;
@@ -488,7 +488,7 @@ public:
     void SetRange(long from, long to, long total);
     bool GetRange(long& from, long& to, long& total);
 
-    int Redirect(const std::string& location, http_status status = HTTP_STATUS_FOUND) {
+    int Redirect(const std::string& location, http_status status = HTTP_STATUS_HV_FOUND) {
         status_code = status;
         SetHeader("Location", location);
         return status_code;

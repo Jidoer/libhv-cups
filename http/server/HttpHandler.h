@@ -135,7 +135,7 @@ public:
         }
     }
 
-    int SetError(int error_code, http_status status_code = HTTP_STATUS_BAD_REQUEST) {
+    int SetError(int error_code, http_status status_code = HTTP_STATUS_HV_BAD_REQUEST) {
         error = error_code;
         if (resp) resp->status_code = status_code;
         return error;

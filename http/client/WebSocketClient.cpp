@@ -108,7 +108,7 @@ int WebSocketClient::open(const char* _url, const http_headers& headers) {
             data += nparse;
             size -= nparse;
             if (http_parser_->IsComplete()) {
-                if (http_resp_->status_code != HTTP_STATUS_SWITCHING_PROTOCOLS) {
+                if (http_resp_->status_code != HTTP_STATUS_HV_SWITCHING_PROTOCOLS) {
                     // printf("websocket response:\n%s\n", http_resp_->Dump(true, true).c_str());
                     if (http_req_->redirect && HTTP_STATUS_IS_REDIRECT(http_resp_->status_code)) {
                         std::string location = http_resp_->headers["Location"];

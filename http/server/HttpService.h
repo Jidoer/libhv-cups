@@ -182,7 +182,7 @@ struct HV_EXPORT HttpService {
     }
 
     void AddRoute(const char* path, http_method method, const http_handler& handler);
-    // @retval 0 OK, else HTTP_STATUS_NOT_FOUND, HTTP_STATUS_METHOD_NOT_ALLOWED
+    // @retval 0 OK, else HTTP_STATUS_HV_NOT_FOUND, HTTP_STATUS_METHOD_NOT_ALLOWED
     int  GetRoute(const char* url,  http_method method, http_handler** handler);
     // RESTful API /:field/ => req->query_params["field"]
     int  GetRoute(HttpRequest* req, http_handler** handler);

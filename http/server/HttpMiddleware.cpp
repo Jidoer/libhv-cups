@@ -8,7 +8,7 @@ int HttpMiddleware::CORS(HttpRequest* req, HttpResponse* resp) {
     if (req->method == HTTP_OPTIONS) {
         resp->headers["Access-Control-Allow-Methods"] = req->GetHeader("Access-Control-Request-Method", "OPTIONS, HEAD, GET, POST, PUT, DELETE, PATCH");
         resp->headers["Access-Control-Allow-Headers"] = req->GetHeader("Access-Control-Request-Headers", "Content-Type");
-        return HTTP_STATUS_NO_CONTENT;
+        return HTTP_STATUS_HV_NO_CONTENT;
     }
     return HTTP_STATUS_NEXT;
 }

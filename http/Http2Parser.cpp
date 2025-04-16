@@ -254,7 +254,7 @@ int Http2Parser::SubmitResponse(HttpResponse* res) {
         //res->headers["accept-encoding"] = "identity";
         //res->headers["grpc-accept-encoding"] = "identity";
         //res->headers["grpc-status"] = "0";
-        //res->status_code = HTTP_STATUS_OK;
+        //res->status_code = HTTP_STATUS_HV_OK;
     }
 
     std::vector<nghttp2_nv> nvs;

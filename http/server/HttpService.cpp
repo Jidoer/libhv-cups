@@ -33,7 +33,7 @@ int HttpService::GetRoute(const char* url, http_method method, http_handler** ha
     const char* b = base_url.c_str();
     while (*s && *b && *s == *b) {++s;++b;}
     if (*b != '\0') {
-        return HTTP_STATUS_NOT_FOUND;
+        return HTTP_STATUS_HV_NOT_FOUND;
     }
     const char* e = s;
     while (*e && *e != '?') ++e;
@@ -42,7 +42,7 @@ int HttpService::GetRoute(const char* url, http_method method, http_handler** ha
     auto iter = pathHandlers.find(path);
     if (iter == pathHandlers.end()) {
         if (handler) *handler = NULL;
-        return HTTP_STATUS_NOT_FOUND;
+        return HTTP_STATUS_HV_NOT_FOUND;
     }
     auto method_handlers = iter->second;
     for (auto iter = method_handlers->begin(); iter != method_handlers->end(); ++iter) {
@@ -52,7 +52,7 @@ int HttpService::GetRoute(const char* url, http_method method, http_handler** ha
         }
     }
     if (handler) *handler = NULL;
-    return HTTP_STATUS_METHOD_NOT_ALLOWED;
+    return HTTP_STATUS_HV_METHOD_NOT_ALLOWED;
 }
 
 int HttpService::GetRoute(HttpRequest* req, http_handler** handler) {
@@ -61,7 +61,7 @@ int HttpService::GetRoute(HttpRequest* req, http_handler** handler) {
     const char* b = base_url.c_str();
     while (*s && *b && *s == *b) {++s;++b;}
     if (*b != '\0') {
-        return HTTP_STATUS_NOT_FOUND;
+        return HTTP_STATUS_HV_NOT_FOUND;
     }
     const char* e = s;
     while (*e && *e != '?') ++e;
@@ -121,12 +121,12 @@ int HttpService::GetRoute(HttpRequest* req, http_handler** handler) {
 
             if (params.size() == 0) {
                 if (handler) *handler = NULL;
-                return HTTP_STATUS_METHOD_NOT_ALLOWED;
+                return HTTP_STATUS_HV_METHOD_NOT_ALLOWED;
             }
         }
     }
     if (handler) *handler = NULL;
-    return HTTP_STATUS_NOT_FOUND;
+    return HTTP_STATUS_HV_NOT_FOUND;
 }
 
 void HttpService::Static(const char* path, const char* dir) {

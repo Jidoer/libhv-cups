@@ -232,7 +232,7 @@ int HttpHandler::customHttpHandler(const http_handler& handler) {
 }
 
 int HttpHandler::invokeHttpHandler(const http_handler* handler) {
-    int status_code = HTTP_STATUS_NOT_IMPLEMENTED;
+    int status_code = HTTP_STATUS_HV_NOT_IMPLEMENTED;
     if (handler->sync_handler) {
         // NOTE: sync_handler run on IO thread
         status_code = handler->sync_handler(req.get(), resp.get());
@@ -254,7 +254,7 @@ void HttpHandler::onHeadersComplete() {
     handleRequestHeaders();
     if (service->headerHandler) {
         const int status_code = customHttpHandler(service->headerHandler);
-        if (status_code != HTTP_STATUS_OK && status_code != HTTP_STATUS_NEXT) {
+        if (status_code != HTTP_STATUS_HV_OK && status_code != HTTP_STATUS_NEXT) {
             SetError(ERR_REQUEST, static_cast<http_status>(status_code));
             return;
         }
@@ -315,7 +315,7 @@ void HttpHandler::onBody(const char* data, size_t size) {
 
 void HttpHandler::onMessageComplete() {
     // printf("onMessageComplete\n");
-    int status_code = HTTP_STATUS_OK;
+    int status_code = HTTP_STATUS_HV_OK;
 
     if (error) {
         SendHttpStatusResponse(resp->status_code);
@@ -445,7 +445,7 @@ int HttpHandler::HandleHttpRequest() {
     // pReq->ParseBody();
 
     int status_code = pResp->status_code;
-    if (status_code != HTTP_STATUS_OK) {
+    if (status_code != HTTP_STATUS_HV_OK) {
         goto postprocessor;
     }
 
@@ -507,7 +507,7 @@ postprocessor:
 }
 
 int HttpHandler::defaultRequestHandler() {
-    int status_code = HTTP_STATUS_OK;
+    int status_code = HTTP_STATUS_HV_OK;
 
     if (api_handler) {
         status_code = invokeHttpHandler(api_handler);
@@ -521,12 +521,12 @@ int HttpHandler::defaultRequestHandler() {
             status_code = defaultStaticHandler();
         }
         else {
-            status_code = HTTP_STATUS_NOT_FOUND;
+            status_code = HTTP_STATUS_HV_NOT_FOUND;
         }
     }
     else {
         // Not Implemented
-        status_code = HTTP_STATUS_NOT_IMPLEMENTED;
+        status_code = HTTP_STATUS_HV_NOT_IMPLEMENTED;
     }
 
     return status_code;
@@ -538,7 +538,7 @@ int HttpHandler::defaultStaticHandler() {
     const char* req_path = path.c_str();
     // path safe check
     if (req_path[0] != '/' || strstr(req_path, "/..") || strstr(req_path, "\\..")) {
-        return HTTP_STATUS_BAD_REQUEST;
+        return HTTP_STATUS_HV_BAD_REQUEST;
     }
 
     std::string filepath;
@@ -551,23 +551,23 @@ int HttpHandler::defaultStaticHandler() {
         filepath = service->GetStaticFilepath(req_path);
     }
     if (filepath.empty()) {
-        return HTTP_STATUS_NOT_FOUND;
+        return HTTP_STATUS_HV_NOT_FOUND;
     }
 
-    int status_code = HTTP_STATUS_OK;
+    int status_code = HTTP_STATUS_HV_OK;
     // Range:
     bool has_range = false;
     long from, to = 0;
     if (req->GetRange(from, to)) {
         has_range = true;
         if (openFile(filepath.c_str()) != 0) {
-            return HTTP_STATUS_NOT_FOUND;
+            return HTTP_STATUS_HV_NOT_FOUND;
         }
         long total = file->size();
         if (to == 0 || to >= total) to = total - 1;
         file->seek(from);
-        status_code = HTTP_STATUS_PARTIAL_CONTENT;
-        resp->status_code = HTTP_STATUS_PARTIAL_CONTENT;
+        status_code = HTTP_STATUS_HV_PARTIAL_CONTENT;
+        resp->status_code = HTTP_STATUS_HV_PARTIAL_CONTENT;
         resp->content_length = to - from + 1;
         resp->SetContentTypeByFilename(filepath.c_str());
         resp->SetRange(from, to, total);
@@ -578,7 +578,7 @@ int HttpHandler::defaultStaticHandler() {
             if (nread != resp->content_length) {
                 resp->content_length = 0;
                 resp->body.clear();
-                return HTTP_STATUS_INTERNAL_SERVER_ERROR;
+                return HTTP_STATUS_HV_INTERNAL_SERVER_ERROR;
             }
         }
         else {
@@ -607,7 +607,7 @@ int HttpHandler::defaultStaticHandler() {
                 status_code = defaultLargeFileHandler();
             }
         } else {
-            status_code = HTTP_STATUS_NOT_FOUND;
+            status_code = HTTP_STATUS_HV_NOT_FOUND;
         }
     }
     else {
@@ -616,25 +616,25 @@ int HttpHandler::defaultStaticHandler() {
         if (iter != req->headers.end() &&
             strcmp(iter->second.c_str(), fc->etag) == 0) {
             fc = NULL;
-            return HTTP_STATUS_NOT_MODIFIED;
+            return HTTP_STATUS_HV_NOT_MODIFIED;
         }
 
         iter = req->headers.find("if-modified-since");
         if (iter != req->headers.end() &&
             strcmp(iter->second.c_str(), fc->last_modified) == 0) {
             fc = NULL;
-            return HTTP_STATUS_NOT_MODIFIED;
+            return HTTP_STATUS_HV_NOT_MODIFIED;
         }
     }
     return status_code;
 }
 
 int HttpHandler::defaultLargeFileHandler() {
-    if (!writer) return HTTP_STATUS_NOT_IMPLEMENTED;
+    if (!writer) return HTTP_STATUS_HV_NOT_IMPLEMENTED;
     if (!isFileOpened()) {
         std::string filepath = service->GetStaticFilepath(req->Path().c_str());
         if (filepath.empty() || openFile(filepath.c_str()) != 0) {
-            return HTTP_STATUS_NOT_FOUND;
+            return HTTP_STATUS_HV_NOT_FOUND;
         }
         resp->content_length = file->size();
         resp->SetContentTypeByFilename(filepath.c_str());
@@ -642,7 +642,7 @@ int HttpHandler::defaultLargeFileHandler() {
     if (service->limit_rate == 0) {
         // forbidden to send large file
         resp->content_length = 0;
-        resp->status_code = HTTP_STATUS_FORBIDDEN;
+        resp->status_code = HTTP_STATUS_HV_FORBIDDEN;
     } else {
         size_t bufsize = 40960; // 40K
         file->buf.resize(bufsize);
@@ -947,7 +947,7 @@ int HttpHandler::upgradeWebSocket() {
     Upgrade: websocket
     Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=
     */
-    resp->status_code = HTTP_STATUS_SWITCHING_PROTOCOLS;
+    resp->status_code = HTTP_STATUS_HV_SWITCHING_PROTOCOLS;
     resp->headers["Connection"] = "Upgrade";
     resp->headers["Upgrade"] = "websocket";
 
@@ -987,7 +987,7 @@ int HttpHandler::upgradeHTTP2() {
     Connection: Upgrade
     Upgrade: h2c
     */
-    resp->status_code = HTTP_STATUS_SWITCHING_PROTOCOLS;
+    resp->status_code = HTTP_STATUS_HV_SWITCHING_PROTOCOLS;
     resp->headers["Connection"] = "Upgrade";
     resp->headers["Upgrade"] = "h2c";
 
@@ -1022,7 +1022,7 @@ int HttpHandler::handleForwardProxy() {
         return connectProxy(req->url);
     } else {
         hlogw("Forbidden to forward proxy %s", req->url.c_str());
-        SetError(HTTP_STATUS_FORBIDDEN, HTTP_STATUS_FORBIDDEN);
+        SetError(HTTP_STATUS_HV_FORBIDDEN, HTTP_STATUS_HV_FORBIDDEN);
     }
     return 0;
 }
@@ -1055,7 +1055,7 @@ int HttpHandler::connectProxy(const std::string& strUrl) {
 
     if (forward_proxy && !service->IsTrustProxy(url.host.c_str())) {
         hlogw("Forbidden to proxy %s", url.host.c_str());
-        SetError(HTTP_STATUS_FORBIDDEN, HTTP_STATUS_FORBIDDEN);
+        SetError(HTTP_STATUS_HV_FORBIDDEN, HTTP_STATUS_HV_FORBIDDEN);
         return 0;
     }
 
@@ -1065,7 +1065,7 @@ int HttpHandler::connectProxy(const std::string& strUrl) {
     proxy_port = url.port;
     hio_t* upstream_io = hio_create_socket(loop, proxy_host.c_str(), proxy_port, HIO_TYPE_TCP, HIO_CLIENT_SIDE);
     if (upstream_io == NULL) {
-        return SetError(ERR_SOCKET, HTTP_STATUS_BAD_GATEWAY);
+        return SetError(ERR_SOCKET, HTTP_STATUS_HV_BAD_GATEWAY);
     }
     if (url.scheme == "https") {
         hio_enable_ssl(upstream_io);
@@ -1123,7 +1123,7 @@ void HttpHandler::onProxyConnect(hio_t* upstream_io) {
     handler->proxy_connected = 1;
 
     if (handler->req->method == HTTP_CONNECT) {
-        // handler->resp->status_code = HTTP_STATUS_OK;
+        // handler->resp->status_code = HTTP_STATUS_HV_OK;
         // handler->SendHttpResponse();
         hio_write(io, HTTP_200_CONNECT_RESPONSE, HTTP_200_CONNECT_RESPONSE_LEN);
         handler->state = SEND_DONE;
@@ -1151,7 +1151,7 @@ void HttpHandler::onProxyClose(hio_t* upstream_io) {
 
     int error = hio_error(upstream_io);
     if (error == ETIMEDOUT) {
-        handler->SendHttpStatusResponse(HTTP_STATUS_GATEWAY_TIMEOUT);
+        handler->SendHttpStatusResponse(HTTP_STATUS_HV_GATEWAY_TIMEOUT);
     }
 
     handler->error = error;
